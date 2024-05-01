@@ -4,6 +4,8 @@ import * as GEOLIB from 'geolib';
 const center = [-122.0583, 36.9916]
 const scale = 10000
 
+// Color
+
 const buildingsGroup = new THREE.Group();
 
 async function createBuildings() {
@@ -32,6 +34,22 @@ function LoadBuildings(data) {
     }
 }
 
+function getMatrial(info) {
+
+    switch (info["building"]) {
+        case "university": return new THREE.MeshBasicMaterial({ color: "lightskyblue" });
+        case "apartments": return new THREE.MeshBasicMaterial({ color: "greenyellow" });
+        case "roof": new THREE.MeshBasicMaterial({ color: "purple" });
+        case "dormitory": return new THREE.MeshBasicMaterial({ color: "orange" });
+        case "house": return new THREE.MeshBasicMaterial({ color: "yellow" });
+        case "trailer": return new THREE.MeshBasicMaterial({ color: "khaki" });
+        case "greenhouse": return new THREE.MeshBasicMaterial({ color: "green" });
+        case "farm_auxiliary": return new THREE.MeshBasicMaterial({ color: "aquamarine" });
+        case "industrial": return new THREE.MeshBasicMaterial({ color: "darkblue" });
+        default: return new THREE.MeshBasicMaterial({ color: "deeppink" });
+    }
+}
+
 function addBuilding(data, info, height = 1) {
 
     height = height ? height : 1
@@ -52,28 +70,21 @@ function addBuilding(data, info, height = 1) {
         geometry.rotateX(Math.PI / 2)
         geometry.rotateZ(Math.PI)
 
-        let mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: "white" }))
+        let mesh = new THREE.Mesh(geometry, getMatrial(info))
         mesh.geometry.computeBoundingBox();
 
         // Now move the building to its new spot. 
-        console.log("Building center", temp.centroid);
-
-        let dis = GEOLIB.getDistance(temp.centroid, center)
-
-        console.log("Distance between center of map and building", dis);
         let direction = new THREE.Vector2((temp.centroid[0] - center[0]) * scale, (temp.centroid[1] - center[1]) * scale);
-        console.log("Direction vector: ", direction)
 
         mesh.position.x = -direction.x;
         mesh.position.z = direction.y;
 
+        // Add info to mesh user data 
+        mesh.userData.info = info;
+        mesh.userData.centroid = temp.centroid;
+        mesh.userData.type = "building"
+
         buildingsGroup.add(mesh)
-
-        // let bbox = mesh.geometry.boundingBox
-        // // Create a helper to visualize the bounding box
-        // const bboxHelper = new THREE.Box3Helper(bbox, 0xff0000); // Red color for visibility
-
-        //buildingsGroup.add(bboxHelper);
     }
 }
 

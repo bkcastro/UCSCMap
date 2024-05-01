@@ -10,7 +10,7 @@ class Map extends THREE.Object3D {
         this.buildings = null;
         this.routes = null;
         this.rotateY(Math.PI);
-
+        this.scale.multiplyScalar(.25);
         this.init();
     }
 

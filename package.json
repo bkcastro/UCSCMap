@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "geolib": "^3.3.4",
+    "openrouteservice-js": "^0.3.2",
     "stats.js": "^0.17.0",
     "three": "^0.164.1",
     "three.js": "^0.77.1"

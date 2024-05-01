@@ -1,0 +1,7 @@
+.banner {}
+
+.container {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(206, 224, 44);
+}
