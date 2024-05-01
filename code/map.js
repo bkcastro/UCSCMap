@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import createBuildings from './buildings';
+import createBuildings from './buildings2';
 import createRoutes from './routes';
 
 class Map extends THREE.Object3D {
@@ -9,9 +9,7 @@ class Map extends THREE.Object3D {
 
         this.buildings = null;
         this.routes = null;
-
-        this.raycast = new THREE.Raycaster();
-        this.raycast.params.Line.threshold = 3;
+        this.rotateY(Math.PI);
 
         this.init();
     }

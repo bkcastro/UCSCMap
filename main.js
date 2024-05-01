@@ -12,9 +12,9 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 // Position the camera
-camera.position.y = 15;
-camera.position.x = 10;
-camera.position.z = 10;
+camera.position.y = 100;
+// camera.position.x = 10;
+// camera.position.z = 10;
 camera.updateProjectionMatrix();
 
 // Renderer
@@ -52,6 +52,38 @@ scene.add(light1)
 // Our Map 
 const map = new Map();
 scene.add(map);
+
+// Raycaster 
+const raycast = new THREE.Raycaster();
+raycast.params.Line.threshold = 3;
+
+// Set up mouse events for raycasting
+const mouse = new THREE.Vector2();
+renderer.domElement.addEventListener('click', onMouseClick);
+
+
+function onMouseClick(event) {
+  console.log("clicked");
+
+  if (map.buildings == null) { return } // Not ready yet
+
+  // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+  mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+  mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+  // Update the picking ray with the camera and mouse position
+  raycast.setFromCamera(mouse, camera);
+
+  // Calculate objects intersecting the picking ray
+  const intersects = raycast.intersectObjects(map.buildings.children, true);
+
+  if (intersects.length > 0) {
+    //console.log('Building clicked:', intersects[0].object);
+    const randomColor = new THREE.Color(Math.random() * 0xffffff);
+    intersects[0].object.material.color = randomColor;
+    intersects[0].object.material.needsUpdate = true;
+  }
+}
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;

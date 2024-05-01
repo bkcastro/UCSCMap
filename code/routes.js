@@ -33,7 +33,7 @@ function latLonToXY(coordinates) {
 function LoadRoutes(data) {
     let features = data.features
 
-    console.log("features", features.length);
+    //console.log("features", features.length);
 
     for (let i = 0; i < 10; i++) {
 
@@ -46,14 +46,12 @@ function LoadRoutes(data) {
 }
 
 function addRoute(data, info) {
-    console.log("hi", data);
 
     let points = [];
 
     for (let i = 0; i < data.length; i++) {
         let el = data[i]
     }
-
 
 }
 
