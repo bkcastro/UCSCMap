@@ -13,7 +13,7 @@ stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild(stats.dom)
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
 
 // Position the camera
 camera.position.y = 10;
@@ -55,10 +55,10 @@ controls.maxDistance = 1000
 
 // Helpers
 let gridHelper = new THREE.GridHelper(50, 30, new THREE.Color(0x555555), new THREE.Color(0x333333))
-scene.add(gridHelper);
+//scene.add(gridHelper);
 
 let axisHelper = new THREE.AxesHelper(10, 10);
-scene.add(axisHelper);
+//scene.add(axisHelper);
 
 // Init Light
 let light0 = new THREE.AmbientLight(0xfafafa, 10.25)

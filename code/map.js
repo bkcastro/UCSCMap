@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import createBuildings from './buildings2';
+import createBuildings from './buildings';
 import createRoutes from './routes';
 
 class Map extends THREE.Object3D {
