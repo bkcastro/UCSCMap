@@ -16,7 +16,7 @@ To use the map, simply click on any building to view its information logged in t
 
 ## Screenshot
 Here is a screenshot of the map in action:
-![UCSC Campus Map](images.png "Interactive UCSC Campus Map")
+![UCSC Campus Map](image.png "Interactive UCSC Campus Map")
 
 ## Technical Details
 - **GeoJSON Data**: Data is pulled from OpenStreetMap.
