@@ -8,11 +8,14 @@ const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
 
 const routesGroup = new THREE.Group();
 
+const highwayTypes = new Set();
+
 async function createRotues() {
     try {
         const response = await fetch('/UCSC_Highways.geojson');
         const data = await response.json();
         LoadRoutes(data);
+        printHighwayTypes();
         return routesGroup;
     } catch (error) {
         throw error; // This will allow the caller to handle the error
@@ -22,8 +25,6 @@ async function createRotues() {
 function LoadRoutes(data) {
     let features = data.features
 
-    console.log("features", features.length);
-
     for (let i = 0; i < features.length; i++) {
 
         let fel = features[i]
@@ -32,6 +33,38 @@ function LoadRoutes(data) {
             addRoute(fel.geometry.coordinates, fel.properties)
         }
     }
+}
+
+function getMatrial(info) {
+    switch (info["highway"]) {
+        case "pedestrian": return new THREE.LineBasicMaterial({ color: "blue" });
+        case "residential": return new THREE.LineBasicMaterial({ color: "coral" });
+        case "service": return new THREE.LineBasicMaterial({ color: "springgreen" });
+        case "tertiary": return new THREE.LineBasicMaterial({ color: "skyblue" });
+        case "secondary": return new THREE.LineBasicMaterial({ color: "blue" });
+        case "track": return new THREE.LineBasicMaterial({ color: "brown" });
+        case "secondary_link": return new THREE.LineBasicMaterial({ color: "magenta" }); // Wheel chair ramp
+        case "cycleway": return new THREE.LineBasicMaterial({ color: "pink" });
+        case "footway": return new THREE.LineBasicMaterial({ color: "moccasin" });
+        case "path": return new THREE.LineBasicMaterial({ color: "orchid" });
+        case "steps": return new THREE.LineDashedMaterial({ color: "red", linewidth: 1, scale: 1, dashSize: .4, gapSize: .4 });
+        case "living_street": return new THREE.LineBasicMaterial({ color: "ornage" });
+        default: return new THREE.LineBasicMaterial({ color: "purple" })
+    }
+}
+
+function printHighwayTypes() {
+    console.log("Printing types of highways")
+    highwayTypes.forEach((type) => {
+        console.log(type);
+    })
+}
+
+function addHighwayType(info) {
+
+    if (info["highway"] == undefined) { return }
+
+    highwayTypes.add(info["highway"])
 }
 
 function addRoute(data, info) {
@@ -47,11 +80,9 @@ function addRoute(data, info) {
             temp = normalizePolygon(data);
         }
 
-        console.log("normpoints: ", temp, data, info);
-
         let geometry = genGemoetry(temp.polygon)
 
-        let line = new THREE.Line(geometry, lineMaterial)
+        let line = new THREE.Line(geometry, getMatrial(info))
 
         // Now move the building to its new spot. 
         let direction = new THREE.Vector2((temp.centroid[0] - center[0]) * scale, (temp.centroid[1] - center[1]) * scale);
@@ -67,6 +98,10 @@ function addRoute(data, info) {
         line.userData.centroid = temp.centroid;
         line.userData.type = "line"
 
+        if (info["highway"] == "steps") {
+            line.computeLineDistances()
+        }
+
         routesGroup.add(line)
     }
 
@@ -81,7 +116,6 @@ function findCentroid(polygon) {
         y += polygon[i][1];
     }
 
-    console.log("find centroid ", polygon)
     return [x / n, y / n];
 }
 
