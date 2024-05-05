@@ -4,11 +4,18 @@ import { pointUV } from 'three/examples/jsm/nodes/Nodes.js';
 
 const center = [-122.0583, 36.9916]
 const scale = 10000; // Adjust this scale factor to fit your scene
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0x0000ff });
-
+const lineMaterialBlack = new THREE.LineBasicMaterial({ color: "brown", opacity: .5, transparent: true });
+const pointMaterial = new THREE.PointsMaterial({
+    size: .01, // size of the points
+    sizeAttenuation: true, // points get smaller with distance
+    color: 0xff0000, // red
+});
 const routesGroup = new THREE.Group();
 
 const highwayTypes = new Set();
+
+let counter = 0;
+let strenght = 0.01;
 
 async function createRotues() {
     try {
@@ -25,6 +32,8 @@ async function createRotues() {
 function LoadRoutes(data) {
     let features = data.features
 
+    console.log(features.length)
+
     for (let i = 0; i < features.length; i++) {
 
         let fel = features[i]
@@ -37,19 +46,19 @@ function LoadRoutes(data) {
 
 function getMatrial(info) {
     switch (info["highway"]) {
-        case "pedestrian": return new THREE.LineBasicMaterial({ color: "blue" });
-        case "residential": return new THREE.LineBasicMaterial({ color: "coral" });
-        case "service": return new THREE.LineBasicMaterial({ color: "springgreen" });
-        case "tertiary": return new THREE.LineBasicMaterial({ color: "skyblue" });
-        case "secondary": return new THREE.LineBasicMaterial({ color: "blue" });
-        case "track": return new THREE.LineBasicMaterial({ color: "brown" });
-        case "secondary_link": return new THREE.LineBasicMaterial({ color: "magenta" }); // Wheel chair ramp
-        case "cycleway": return new THREE.LineBasicMaterial({ color: "pink" });
-        case "footway": return new THREE.LineBasicMaterial({ color: "moccasin" });
-        case "path": return new THREE.LineBasicMaterial({ color: "orchid" });
-        case "steps": return new THREE.LineDashedMaterial({ color: "red", linewidth: 1, scale: 1, dashSize: .4, gapSize: .4 });
-        case "living_street": return new THREE.LineBasicMaterial({ color: "ornage" });
-        default: return new THREE.LineBasicMaterial({ color: "purple" })
+        // case "pedestrian": return new THREE.LineBasicMaterial({ color: "blue" });
+        // case "residential": return new THREE.LineBasicMaterial({ color: "coral" });
+        // case "service": return new THREE.LineBasicMaterial({ color: "springgreen" });
+        // case "tertiary": return new THREE.LineBasicMaterial({ color: "skyblue" });
+        // case "secondary": return new THREE.LineBasicMaterial({ color: "blue" });
+        // case "track": return new THREE.LineBasicMaterial({ color: "brown" });
+        // case "secondary_link": return new THREE.LineBasicMaterial({ color: "magenta" }); // Wheel chair ramp
+        // case "cycleway": return new THREE.LineBasicMaterial({ color: "pink" });
+        // case "footway": return new THREE.LineBasicMaterial({ color: "moccasin" });
+        // case "path": return new THREE.LineBasicMaterial({ color: "orchid" });
+        case "steps": return new THREE.LineDashedMaterial({ color: "orchid", linewidth: 1, scale: 1, dashSize: .4, gapSize: .4 });
+        // case "living_street": return new THREE.LineBasicMaterial({ color: "ornage" });
+        default: return lineMaterialBlack;
     }
 }
 
@@ -69,6 +78,8 @@ function addHighwayType(info) {
 
 function addRoute(data, info) {
 
+    let type = info["highway"];
+
     // This is because fel.geometry.coordinates is an array of arrays of cooridntes that make up all the polygons need for a building
     for (let i = 0; i < data.length; i++) {
 
@@ -82,6 +93,8 @@ function addRoute(data, info) {
 
         let geometry = genGemoetry(temp.polygon)
 
+        //let line = new THREE.Points(geometry, pointMaterial);
+
         let line = new THREE.Line(geometry, getMatrial(info))
 
         // Now move the building to its new spot. 
@@ -94,16 +107,18 @@ function addRoute(data, info) {
         line.position.z = direction.y;
 
         // Add info to mesh user data 
-        line.userData.info = info;
+        //line.userData.info = info;
         line.userData.centroid = temp.centroid;
         line.userData.type = "line"
 
         if (info["highway"] == "steps") {
-            line.computeLineDistances()
+            // line.computeLineDistances()
         }
 
         routesGroup.add(line)
     }
+
+
 
 }
 
@@ -131,6 +146,7 @@ function normalizePolygon(polygon) {
 
 function genGemoetry(polygon) {
 
+
     const points = [];
 
     for (let i = 0; i < polygon.length; i++) {
@@ -138,6 +154,8 @@ function genGemoetry(polygon) {
 
         points.push(new THREE.Vector3(elp[0], 0, elp[1]))
     }
+
+    counter += 1
 
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
 

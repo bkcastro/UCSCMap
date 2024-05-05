@@ -6,6 +6,9 @@ const scale = 10000
 
 // Color
 
+let counter = 0;
+let strenght = 0.1;
+
 const buildingsGroup = new THREE.Group();
 
 async function createBuildings() {
@@ -79,6 +82,7 @@ function addBuilding(data, info, height = 1) {
         mesh.position.x = -direction.x;
         mesh.position.z = direction.y;
 
+        counter += 1;
         // Add info to mesh user data 
         mesh.userData.info = info;
         mesh.userData.centroid = temp.centroid;
