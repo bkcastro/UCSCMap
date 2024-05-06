@@ -6,16 +6,16 @@ const scale = 10000;
 const materials = {
     pedestrian: new THREE.LineBasicMaterial({ color: "lightblue" }),
     residential: new THREE.LineBasicMaterial({ color: "coral" }),
-    service: new THREE.LineBasicMaterial({ color: "springgreen" }),
+    service: new THREE.LineBasicMaterial({ color: 0xf695fc }),
     tertiary: new THREE.LineBasicMaterial({ color: "skyblue" }),
     secondary: new THREE.LineBasicMaterial({ color: "lightgreen" }),
     track: new THREE.LineBasicMaterial({ color: "lightbrown" }),
     secondary_link: new THREE.LineBasicMaterial({ color: "magenta" }), // Wheel chair ramp
-    cycleway: new THREE.LineBasicMaterial({ color: "pink" }),
-    footway: new THREE.LineBasicMaterial({ color: "moccasin" }),
-    path: new THREE.LineBasicMaterial({ color: "pink" }),
+    cycleway: new THREE.LineBasicMaterial({ color: "Bisque" }),
+    footway: new THREE.LineBasicMaterial({ color: 0x828282 }),
+    path: new THREE.LineBasicMaterial({ color: 0xE6E6FA }),
     steps: new THREE.LineDashedMaterial({ color: "orchid", linewidth: 1, scale: 1, dashSize: .4, gapSize: .4, opacity: 0.2 }),
-    living_street: new THREE.LineBasicMaterial({ color: "ornage" }),
+    living_street: new THREE.LineBasicMaterial({ color: 0xfffdb8 }),
     default: new THREE.LineBasicMaterial({ color: "black" }),
 }
 

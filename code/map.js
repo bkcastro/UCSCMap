@@ -115,7 +115,7 @@ class Map extends THREE.Object3D {
         this.clickedBuildings = [];
 
         this.routes.forEach((route) => {
-            route.geometry.dipose();
+            console.log("hi kill me ")
             this.remove(route);
         })
 

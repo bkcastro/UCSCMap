@@ -12,7 +12,7 @@ The primary aim of this project is to provide an easy-to-use template for buildi
 - **Color Coding**: Buildings and routes are color-coded for easier identification.
 
 ## Using the Map
-To use the map, simply click on any building to view its information logged in the console. If you want to find a route from one building to another, click on your starting building, then select your destination, the route will be logged in your console. 
+To use the map, select the buildings using the mouse and clicking on the with the left mouse button, then press calculate route (bottom right). Currently only routes between two buildings work. You can pan around the map using right click, rotate using the left click, and zoom using the mouse wheel.
 
 ## Screenshot
 Here is a screenshot of the map in action:
