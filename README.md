@@ -3,7 +3,7 @@
 ## Overview
 This project presents an interactive 3D map of the University of California, Santa Cruz (UCSC) campus. The map utilizes GeoJSON data sourced from OpenStreetMap and is rendered using the Three.js library. This interactive tool allows users to click on various campus buildings and obtain routes between them, courtesy of the OpenRoute Service.
 
-The primary aim of this project is to provide an easy-to-use template for building 3D map web applictions. 
+The primary aim of this project is to provide an easy-to-use template for building 3D map web applications. 
 
 ## Features
 - **Interactive 3D Map**: Explore the UCSC campus in three dimensions.
