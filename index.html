@@ -5,14 +5,33 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    .container {
+      position: relative;
+      height: 100vh;
+    }
+
+    .my-button-1 {
+      position: absolute;
+      bottom: 50px;
+      right: 20px;
+    }
+
+    .my-button-2 {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+    }
+  </style>
   <title>UCSCMap</title>
 </head>
 
 <body>
   <div>
-
     <div id="app" class="container">
 
+      <button id="calcRoute" class="my-button-1">Calculate Route</button>
+      <button id="clearRoute" class="my-button-2">Clear Route</button>
     </div>
   </div>
   <script type="module" src="/main.js"></script>

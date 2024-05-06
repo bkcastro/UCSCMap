@@ -1,13 +1,22 @@
 import * as THREE from 'three';
-import * as GEOLIB from 'geolib';
 
 const center = [-122.0583, 36.9916]
 const scale = 10000
 
 // Color
 
-let counter = 0;
-let strenght = 0.1;
+const materials = {
+    university: new THREE.MeshBasicMaterial({ color: "lightskyblue" }),
+    apartments: new THREE.MeshBasicMaterial({ color: "greenyellow" }),
+    roof: new THREE.MeshBasicMaterial({ color: "purple" }),
+    dormitory: new THREE.MeshBasicMaterial({ color: "orange" }),
+    house: new THREE.MeshBasicMaterial({ color: "yellow" }),
+    trailer: new THREE.MeshBasicMaterial({ color: "khaki" }),
+    greenhouse: new THREE.MeshBasicMaterial({ color: "green" }),
+    farm_auxiliary: new THREE.MeshBasicMaterial({ color: "aquamarine" }),
+    industrial: new THREE.MeshBasicMaterial({ color: "darkblue" }),
+    default: new THREE.MeshBasicMaterial({ color: "deeppink" }),
+}
 
 const buildingsGroup = new THREE.Group();
 
@@ -16,9 +25,9 @@ async function createBuildings() {
         const response = await fetch('/UCSC_Buildings.geojson');
         const data = await response.json();
         LoadBuildings(data);
-        return buildingsGroup; // Assuming buildingsGroup is defined and updated in LoadBuildings
+        return buildingsGroup;
     } catch (error) {
-        throw error; // This will allow the caller to handle the error
+        throw error;
     }
 }
 
@@ -81,12 +90,11 @@ function addBuilding(data, info, height = 1) {
 
         mesh.position.x = -direction.x;
         mesh.position.z = direction.y;
-
-        counter += 1;
         // Add info to mesh user data 
         mesh.userData.info = info;
         mesh.userData.centroid = temp.centroid;
         mesh.userData.type = "building"
+        mesh.userData.color = mesh.material.color.getHex();
 
         buildingsGroup.add(mesh)
     }
@@ -135,24 +143,5 @@ function genGeometry(shape, settings) {
 
     return geometry
 }
-
-function GPSRelativePosition(objPosi) {
-
-    // Get GPS distance
-    let dis = GEOLIB.getDistance(objPosi, center)
-
-    // Get bearing angle
-    let bearing = GEOLIB.getRhumbLineBearing(objPosi, center)
-
-    // Calculate X by centerPosi.x + distance * cos(rad)
-    let x = center[0] + (dis * Math.cos(bearing * Math.PI / 180))
-
-    // Calculate Y by centerPosi.y + distance * sin(rad)
-    let y = center[1] + (dis * Math.sin(bearing * Math.PI / 180))
-
-    // Reverse X (it work) 
-    return [-x / 100, y / 100]
-}
-
 
 export default createBuildings; 

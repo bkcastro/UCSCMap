@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'stats.js'
-import { fetchDirections } from './code/directions';
-
 import Map from './code/map';
 
 const stats = new Stats()
@@ -35,6 +33,9 @@ controls.dampingFactor = .25
 controls.screenSpacePanning = true
 controls.maxDistance = 1000
 
+// Mouse 
+const mouse = new THREE.Vector2();
+
 // Helpers
 let gridHelper = new THREE.GridHelper(50, 30, new THREE.Color(0x555555), new THREE.Color(0x333333))
 //scene.add(gridHelper);
@@ -51,9 +52,39 @@ light1.position.set(20, 30, 10)
 scene.add(light0)
 scene.add(light1)
 
+// Raycaster 
+const raycast = new THREE.Raycaster();
+
 // Our Map 
-const map = new Map(renderer, camera);
+const map = new Map();
 scene.add(map);
+
+renderer.domElement.addEventListener('click', (event) => {
+  console.log("clicked");
+
+  // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+  mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+  mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+  // Update the picking ray with the camera and mouse position
+  raycast.setFromCamera(mouse, camera);
+
+  // Calculate objects intersecting the picking ray
+  const intersects = raycast.intersectObjects(map.buildings.children, true); // Note this only checks if we clicked buildings
+
+  if (intersects.length > 0) {
+    map.checkIntersectedBuildings(intersects[0].object)
+  }
+
+});
+
+document.getElementById('calcRoute').addEventListener('click', () => {
+  map.generateDirections();
+});
+
+document.getElementById('clearRoute').addEventListener('click', () => {
+  map.clearRoutes();
+})
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
