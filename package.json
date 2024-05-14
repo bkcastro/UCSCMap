@@ -12,6 +12,7 @@
     "vite": "^5.2.0"
   },
   "dependencies": {
+    "earcut": "^2.2.4",
     "geolib": "^3.3.4",
     "openrouteservice-js": "^0.3.2",
     "stats.js": "^0.17.0",
