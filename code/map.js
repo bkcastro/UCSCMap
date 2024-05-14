@@ -16,8 +16,13 @@ import makeDirection from './makeDirection';
 // add a search bar 
 // add 2D text to map 
 // add hover 
-// add default UI, problem: I need two different UIs 2D and 3D (for XR); 
-// add multi 
+// add multi building routing 
+// add a Level Of Detail algorithm to improve performance. I think this LOD can be really neat. 
+    // - Like only draw the primary highways and not the pedestrian highways when the camera 
+    //   is at a certain distance from the map. 
+    // - Clipping! We can take stuff out of the renderer if we can't see it. 
+// ? where can I get images ? that change in level of detail? how do I make my map cooler? 
+// Should I draw onto a texture green areas which represent trees, grass, roads, etc. Lot of work 
 
 function deselectBuilding(object) {
     object.material.color.setHex(object.userData.color);
