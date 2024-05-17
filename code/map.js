@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import Openrouteservice from 'openrouteservice-js'
-
 import createBuildings from './buildings';
 import createHighways from './highways';
-
 import makeDirection from './makeDirection';
+import { getProfileInfo } from './profiles';
 
 // So I want to be able to export this Map as a contain unite where it handles routing between different locations, drawing, etc 
 // The main problem is that I want to be able to use this map with different controllers and in different spaces like XR, mobile, and desktop 
@@ -16,13 +15,8 @@ import makeDirection from './makeDirection';
 // add a search bar 
 // add 2D text to map 
 // add hover 
-// add multi building routing 
-// add a Level Of Detail algorithm to improve performance. I think this LOD can be really neat. 
-    // - Like only draw the primary highways and not the pedestrian highways when the camera 
-    //   is at a certain distance from the map. 
-    // - Clipping! We can take stuff out of the renderer if we can't see it. 
-// ? where can I get images ? that change in level of detail? how do I make my map cooler? 
-// Should I draw onto a texture green areas which represent trees, grass, roads, etc. Lot of work 
+// add default UI, problem: I need two different UIs 2D and 3D (for XR); 
+// add multi 
 
 function deselectBuilding(object) {
     object.material.color.setHex(object.userData.color);
@@ -35,19 +29,31 @@ function selectBuilding(object) {
 }
 
 class Map extends THREE.Object3D {
-    constructor() {
+    constructor(scene = null) {
         super();
+
+        if (Map.instance) {
+            return Map.instance;
+        }
+
         this.buildings = null;
         this.highways = null;
         this.rotateY(Math.PI);
         this.scale.multiplyScalar(.25);
+        scene.add(this);
+
+        this.position.y = 5
+
+        Map.instance = this;
 
         // Tools 
         this.orsDirections = new Openrouteservice.Directions({ api_key: import.meta.env.VITE_OPENSTREET_API_KEY });
 
-        // Value to store current drawn route 
         this.routes = [];
-        this.clickedBuildings = [];
+        this.clickedBuildings = new Set();
+
+        // Profile type 
+        this.profile = getProfileInfo('walking', 'walking');
 
         this.init();
     }
@@ -80,15 +86,19 @@ class Map extends THREE.Object3D {
             return
         } else if (length == 2) {
 
-            const from = this.clickedBuildings[0].userData.centroid;
-            const to = this.clickedBuildings[1].userData.centroid;
+            let from = this.clickedBuildings[0].userData.centroid;
+            let to = this.clickedBuildings[1].userData.centroid;
             console.log("Getting Directions from " + from + " and " + to);
+
+            // Don't ask lol 
+            from = [from[0], from[1]];
+            to = [to[0], to[1]];
 
             let temp = this;
 
             this.orsDirections.calculate({
                 coordinates: [from, to],
-                profile: "driving-car",
+                profile: temp.profile.profile,
                 format: "geojson",
                 api_version: 'v2',
             })
@@ -99,6 +109,7 @@ class Map extends THREE.Object3D {
                     console.log("cords:= ", route)
                     temp.routes.push(route);
                     temp.add(route);
+                    console.log(JSON.stringify(json));
                 })
                 .catch(function (err) {
                     let response = JSON.stringify(err, null, "\t")
@@ -120,7 +131,7 @@ class Map extends THREE.Object3D {
         this.clickedBuildings = [];
 
         this.routes.forEach((route) => {
-            console.log("hi kill me ")
+            console.log("Route cleared")
             this.remove(route);
         })
 
@@ -129,28 +140,30 @@ class Map extends THREE.Object3D {
 
     checkIntersectedBuildings(object) {
 
-        console.log("Building clicked", object.userData.info);
+        console.log("Building clicked", object.userData.info['@id']);
+        console.log(this.profile)
 
-        let temp = -1;
-        for (let i = this.clickedBuildings.length - 1; i >= 0; i--) {
-            if (this.clickedBuildings[i] === object) {
-                temp = i;
-                i = this.clickedBuildings.length + 2; // dip out 
-            }
-        }
+        // let temp = -1;
+        // for (let i = this.clickedBuildings.length - 1; i >= 0; i--) {
+        //     if (this.clickedBuildings[i] === object) {
+        //         temp = i;
+        //         i = this.clickedBuildings.length + 2; // dip out 
+        //     }
+        // }
 
-        if (temp > -1) {
-            this.clickedBuildings.splice(i, 1);
-            deselectBuilding(object);
-        } else {
-            selectBuilding(object);
-            this.clickedBuildings.push(object);
-        }
+        // if (temp > -1) {
+        //     this.clickedBuildings.splice(i, 1);
+        //     deselectBuilding(object);
+        // } else {
+        //     selectBuilding(object);
+        //     this.clickedBuildings.push(object);
+        // }
     }
 
     update(time) {
 
     }
+
 }
 
 

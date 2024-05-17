@@ -56,8 +56,9 @@ scene.add(light1)
 const raycast = new THREE.Raycaster();
 
 // Our Map 
-const map = new Map();
-scene.add(map);
+const map = new Map(scene);
+
+// Bug if the user clicks to many times then the map crashes 
 
 renderer.domElement.addEventListener('click', (event) => {
   console.log("clicked");

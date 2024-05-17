@@ -1,19 +1,15 @@
 import * as THREE from 'three';
-import earcut from 'earcut'; 
 
-const center = [-122.0583, 36.9916]
+const center = [-122.0583, 36.9916, 36.9941766]
 const scale = 10000;
 
-const indices = [];
-const vertices = [];
-const colors = [];
-
-const material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
-const geometry = new THREE.BufferGeometry();
-
+let alltypes = ['pedestrian', 'track', 'crossing', 'secondary', 'steps', 'footway',
+    'traffic_signals', 'living_street', 'secondary_link',
+    'service', 'cycleway', 'turning_circle', 'proposed', 'tertiary', 'path']
+let temp = ['residential', 'secondary', 'service', 'path', 'track']
 
 const materials = {
-    pedestrian: new THREE.LineBasicMaterial({ color: "lightblue" }),
+    pedestrian: new THREE.LineBasicMaterial({ color: "black" }),
     residential: new THREE.LineBasicMaterial({ color: "coral" }),
     service: new THREE.LineBasicMaterial({ color: 0xf695fc }),
     tertiary: new THREE.LineBasicMaterial({ color: "skyblue" }),
@@ -30,25 +26,17 @@ const materials = {
 
 const routesGroup = new THREE.Group();
 
-const highwayTypes = new Set();
+const highwayTypes = new Set(temp);
+
+console.log(highwayTypes);
 
 async function createHighways() {
     try {
-        const response = await fetch('/UCSC_Highways.geojson');
+        // const response = await fetch('/UCSC_Highways.geojson');
+        const response = await fetch('/UCSC_Highways_V7.geojson')
         const data = await response.json();
         LoadHighways(data);
         //printHighwayTypes();
-
-        // Create a single geometry and add to the scene
-        geometry.setIndex(indices);
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        geometry.computeBoundingSphere();
-
-        const material = new THREE.LineBasicMaterial({ vertexColors: true });
-        const line = new THREE.LineSegments(geometry, material);
-        routesGroup.add(line);
-
         return routesGroup;
     } catch (error) {
         throw error;
@@ -58,12 +46,9 @@ async function createHighways() {
 function LoadHighways(data) {
     let features = data.features
 
-    console.log(features.length)
-
     for (let i = 0; i < features.length; i++) {
 
         let fel = features[i]
-
         if (fel.properties['highway']) {
             addHighway(fel.geometry.coordinates, fel.properties)
         }
@@ -84,55 +69,52 @@ function getMatrial(info) {
         case "path": return materials.path;
         case "steps": return materials.steps;
         case "living_street": return materials.living_street;
+        case "crossing": return materials.default;
+        case "traffic_signals": return materials.default;
+        case "turning_circle": return materials.default;
+        case "proposed": return materials.default;
         default: return materials.default;
-    }
-}
-
-function printHighwayTypes() {
-    console.log("Printing types of highways")
-    highwayTypes.forEach((type) => {
-        console.log(type);
-    })
-}
-
-function updateGeometry(polygon) {
-    const numVertices = polygon.coords.length / 3;
-    const vertexIndices = earcut(polygon.coords);
-    vertexIndices.forEach(vi => indices.push(vi + vertices.length / 3));
-
-    for (let i = 0; i < numVertices; i++) {
-        vertices.push(polygon.coords[3 * i], polygon.coords[3 * i + 1], polygon.coords[3 * i + 2]);
-        colors.push(polygon.color[0], polygon.color[1], polygon.color[2]);
     }
 }
 
 function addHighway(data, info) {
 
+    if (!highwayTypes.has(info["highway"])) {
+        return
+    }
+
+    //console.log(data)
     // This is because fel.geometry.coordinates is an array of arrays of coords that make up all the polygons need for a building
     for (let i = 0; i < data.length; i++) {
 
         // Normalize the coordiantes and return the centroid in lat and long
-        let polygon;
-        if (data[0].length > 2) {
-            polygon = normalizePolygon(data[0]);
+        let temp;
+        if (data[0].length == 1) {
+            temp = normalizePolygon(data[0]);
         } else {
-            polygon = normalizePolygon(data);
+            temp = normalizePolygon(data);
         }
 
-        let geometry = genGemoetry(polygon)
+        let geometry = genGeometry(temp.polygon)
 
-        //let line = new THREE.Points(geometry, pointMaterial);
-        //let line = new THREE.Line(geometry, getMatrial(info))
+        let line = new THREE.Line(geometry, getMatrial(info))
 
-        // Add info to mesh user data 
-        //line.userData.info = info;
+        // Now move the building to its new spot. 
+        let direction = new THREE.Vector2((temp.centroid[0] - center[0]) * scale, (temp.centroid[1] - center[1]) * scale);
+
+        //line.rotateX(Math.PI / 2)
+        line.rotateZ(Math.PI)
+
+        line.position.x = -direction.x;
+        line.position.z = direction.y;
+
         line.userData.type = "line"
 
-        if (info["highway"] == "steps") {
-            line.computeLineDistances()
-        }
+        // if (info["highway"] == "steps") {
+        //     line.computeLineDistances()
+        // }
 
-        routesGroup.add(line)
+        routesGroup.add(line);
     }
 }
 
@@ -151,34 +133,26 @@ function findCentroid(polygon) {
 function normalizePolygon(polygon) {
 
     const centroid = findCentroid(polygon);
-    let direction = new THREE.Vector2((centroid[0] - center[0]) * scale, (centroid[1] - center[1]) * scale);
 
-    const normalizedPolygon = polygon.map(vertex => {
+    const normalizedPolygon = polygon.map(vertex => [
+        (vertex[0] - centroid[0]) * scale,
+        (vertex[1] - centroid[1]) * scale,
+        -((vertex[2] / 10) - (center[2])),
+    ]);
 
-        const x = (vertex[0] - centroid[0]) * scale + direction.x;
-        const y = (vertex[1] - centroid[1]) * scale + direction.y;
-    
-        const rotatedX = -x;
-        const rotatedY = y;
-    
-        return [rotatedX, rotatedY];
-    });
-    
-    return { polygon: normalizedPolygon };
+    return { polygon: normalizedPolygon, centroid: centroid };
 }
 
-function genGemoetry(polygon) {
+function genGeometry(polygon) {
 
     const points = [];
 
     for (let i = 0; i < polygon.length; i++) {
         let elp = polygon[i]
-
-        points.push(new THREE.Vector3(elp[0], 0, elp[1]))
+        points.push(new THREE.Vector3(elp[0], elp[2], elp[1]))
     }
 
-    let geometry = new THREE.BufferGeometry;
-    geometry.setFromPoints(points);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
 
     return geometry;
 }
