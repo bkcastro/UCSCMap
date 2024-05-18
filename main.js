@@ -58,6 +58,10 @@ const raycast = new THREE.Raycaster();
 // Our Map 
 const map = new Map(scene);
 
+scene.add(
+  new THREE.AxesHelper(10)
+)
+
 // Bug if the user clicks to many times then the map crashes 
 
 renderer.domElement.addEventListener('click', (event) => {
