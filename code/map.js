@@ -4,29 +4,19 @@ import createBuildings from './buildings';
 import createHighways from './highways';
 import makeDirection from './makeDirection';
 import { getProfileInfo } from './profiles';
+import { getBuildingMaterial, highlightedMaterial } from './materials';
 
 // So I want to be able to export this Map as a contain unite where it handles routing between different locations, drawing, etc 
 // The main problem is that I want to be able to use this map with different controllers and in different spaces like XR, mobile, and desktop 
 
 // Things to do: 
 // make stuff simple 
-// add elevation 
 // improve performance in route section 
 // add a search bar 
 // add 2D text to map 
 // add hover 
 // add default UI, problem: I need two different UIs 2D and 3D (for XR); 
 // add multi 
-
-function deselectBuilding(object) {
-    object.material.color.setHex(object.userData.color);
-    object.material.needsUpdate = true;
-}
-
-function selectBuilding(object) {
-    object.material.color.setHex(0x000000);
-    object.material.needsUpdate = true;
-}
 
 class Map extends THREE.Object3D {
     constructor(scene = null) {
@@ -39,7 +29,7 @@ class Map extends THREE.Object3D {
         this.buildings = null;
         this.highways = null;
         this.rotateY(Math.PI);
-        this.scale.multiplyScalar(.25);
+        this.scale.multiplyScalar(.1);
         scene.add(this);
 
         this.position.y = 5
@@ -50,7 +40,7 @@ class Map extends THREE.Object3D {
         this.orsDirections = new Openrouteservice.Directions({ api_key: import.meta.env.VITE_OPENSTREET_API_KEY });
 
         this.routes = [];
-        this.clickedBuildings = new Set();
+        this.clickedBuildings = [];
 
         // Profile type 
         this.profile = getProfileInfo('walking', 'walking');
@@ -125,10 +115,8 @@ class Map extends THREE.Object3D {
 
         // Clear the buildings then the routes 
         this.clickedBuildings.forEach((building) => {
-            deselectBuilding(building);
+            this.deselectBuilding(building);
         })
-
-        this.clickedBuildings = [];
 
         this.routes.forEach((route) => {
             console.log("Route cleared")
@@ -138,26 +126,28 @@ class Map extends THREE.Object3D {
         this.routes = [];
     }
 
-    checkIntersectedBuildings(object) {
+    deselectBuilding(building) {
+        console.log(building.userData.info['building'])
+        building.material = getBuildingMaterial(building.userData.info['building']);
+    }
 
-        console.log("Building clicked", object.userData.info['@id']);
-        console.log(this.profile)
+    selectBuilding(building) {
+        building.material = highlightedMaterial;
+    }
 
-        // let temp = -1;
-        // for (let i = this.clickedBuildings.length - 1; i >= 0; i--) {
-        //     if (this.clickedBuildings[i] === object) {
-        //         temp = i;
-        //         i = this.clickedBuildings.length + 2; // dip out 
-        //     }
-        // }
+    checkIntersectedBuildings(building) {
 
-        // if (temp > -1) {
-        //     this.clickedBuildings.splice(i, 1);
-        //     deselectBuilding(object);
-        // } else {
-        //     selectBuilding(object);
-        //     this.clickedBuildings.push(object);
-        // }
+        console.log(building)
+
+        const index = this.clickedBuildings.indexOf(building);
+
+        if (index !== -1) {
+            this.deselectBuilding(building);
+            this.clickedBuildings.splice(index, 1);
+        } else {
+            this.selectBuilding(building);
+            this.clickedBuildings.push(building);
+        }
     }
 
     update(time) {

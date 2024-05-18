@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 
+import { getHighwayMatrial } from './materials';
 const center = [-122.0583, 36.9916, 36.9941766]
 const scale = 10000;
 
@@ -7,22 +8,6 @@ let alltypes = ['pedestrian', 'track', 'crossing', 'secondary', 'steps', 'footwa
     'traffic_signals', 'living_street', 'secondary_link',
     'service', 'cycleway', 'turning_circle', 'proposed', 'tertiary', 'path']
 let temp = ['residential', 'secondary', 'service', 'path', 'track']
-
-const materials = {
-    pedestrian: new THREE.LineBasicMaterial({ color: "black" }),
-    residential: new THREE.LineBasicMaterial({ color: "coral" }),
-    service: new THREE.LineBasicMaterial({ color: 0xf695fc }),
-    tertiary: new THREE.LineBasicMaterial({ color: "skyblue" }),
-    secondary: new THREE.LineBasicMaterial({ color: "lightgreen" }),
-    track: new THREE.LineBasicMaterial({ color: "lightbrown" }),
-    secondary_link: new THREE.LineBasicMaterial({ color: "magenta" }), // Wheel chair ramp
-    cycleway: new THREE.LineBasicMaterial({ color: "Bisque" }),
-    footway: new THREE.LineBasicMaterial({ color: 0x828282 }),
-    path: new THREE.LineBasicMaterial({ color: 0xE6E6FA }),
-    steps: new THREE.LineDashedMaterial({ color: "orchid", linewidth: 1, scale: 1, dashSize: .4, gapSize: .4, opacity: 0.2 }),
-    living_street: new THREE.LineBasicMaterial({ color: 0xfffdb8 }),
-    default: new THREE.LineBasicMaterial({ color: "black" }),
-}
 
 const routesGroup = new THREE.Group();
 
@@ -55,28 +40,6 @@ function LoadHighways(data) {
     }
 }
 
-function getMatrial(info) {
-    switch (info["highway"]) {
-        case "pedestrian": return materials.pedestrian;
-        case "residential": return materials.residential;
-        case "service": return materials.service;
-        case "tertiary": return materials.tertiary;
-        case "secondary": return materials.secondary;
-        case "track": return materials.track;
-        case "secondary_link": return materials.secondary_link; // Wheel chair ramp
-        case "cycleway": return materials.cycleway;
-        case "footway": return materials.footway;
-        case "path": return materials.path;
-        case "steps": return materials.steps;
-        case "living_street": return materials.living_street;
-        case "crossing": return materials.default;
-        case "traffic_signals": return materials.default;
-        case "turning_circle": return materials.default;
-        case "proposed": return materials.default;
-        default: return materials.default;
-    }
-}
-
 function addHighway(data, info) {
 
     if (!highwayTypes.has(info["highway"])) {
@@ -97,7 +60,7 @@ function addHighway(data, info) {
 
         let geometry = genGeometry(temp.polygon)
 
-        let line = new THREE.Line(geometry, getMatrial(info))
+        let line = new THREE.Line(geometry, getHighwayMatrial(info['highway']))
 
         // Now move the building to its new spot. 
         let direction = new THREE.Vector2((temp.centroid[0] - center[0]) * scale, (temp.centroid[1] - center[1]) * scale);

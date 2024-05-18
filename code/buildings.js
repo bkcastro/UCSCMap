@@ -1,22 +1,9 @@
 import * as THREE from 'three';
 
+import { getBuildingMaterial } from './materials';
+
 const center = [-122.0583, 36.9916, 36.9941766] // lon, lat, elev (note elevation is relative to ORS (openrouteservice) classification)
 const scale = 10000
-
-// Color
-
-const materials = {
-    university: new THREE.MeshBasicMaterial({ color: "lightskyblue" }),
-    apartments: new THREE.MeshBasicMaterial({ color: "greenyellow" }),
-    roof: new THREE.MeshBasicMaterial({ color: "purple" }),
-    dormitory: new THREE.MeshBasicMaterial({ color: "orange" }),
-    house: new THREE.MeshBasicMaterial({ color: "yellow" }),
-    trailer: new THREE.MeshBasicMaterial({ color: "khaki" }),
-    greenhouse: new THREE.MeshBasicMaterial({ color: "green" }),
-    farm_auxiliary: new THREE.MeshBasicMaterial({ color: "aquamarine" }),
-    industrial: new THREE.MeshBasicMaterial({ color: "darkblue" }),
-    default: new THREE.MeshBasicMaterial({ color: "deeppink" }),
-}
 
 const buildingsGroup = new THREE.Group();
 
@@ -47,22 +34,6 @@ function LoadBuildings(data) {
     }
 }
 
-function getMatrial(info) {
-
-    switch (info["building"]) {
-        case "university": return new THREE.MeshBasicMaterial({ color: "lightskyblue" });
-        case "apartments": return new THREE.MeshBasicMaterial({ color: "greenyellow" });
-        case "roof": new THREE.MeshBasicMaterial({ color: "purple" });
-        case "dormitory": return new THREE.MeshBasicMaterial({ color: "orange" });
-        case "house": return new THREE.MeshBasicMaterial({ color: "yellow" });
-        case "trailer": return new THREE.MeshBasicMaterial({ color: "khaki" });
-        case "greenhouse": return new THREE.MeshBasicMaterial({ color: "green" });
-        case "farm_auxiliary": return new THREE.MeshBasicMaterial({ color: "aquamarine" });
-        case "industrial": return new THREE.MeshBasicMaterial({ color: "darkblue" });
-        default: return new THREE.MeshBasicMaterial({ color: "deeppink" });
-    }
-}
-
 function addBuilding(building, info, height = 1) {
 
     height = height ? height : 1
@@ -86,7 +57,7 @@ function addBuilding(building, info, height = 1) {
         geometry.rotateX(Math.PI / 2)
         geometry.rotateZ(Math.PI)
 
-        let mesh = new THREE.Mesh(geometry, getMatrial(info))
+        let mesh = new THREE.Mesh(geometry, getBuildingMaterial(info['building']))
         mesh.geometry.computeBoundingBox();
 
         // Now move the building to its new spot. 
